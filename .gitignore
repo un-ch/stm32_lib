@@ -1,0 +1,16 @@
+# The gitignore file specifies intentionally untracked files that Git should ignore.
+#
+*
+# except these files:
+!.gitignore
+!Makefile
+!*.c
+!*.h
+!*startup*xx.s
+!*_FLASH.ld
+
+#/*
+#!/drivers
+#/drivers/*
+#!/drivers/include
+#!/drivers/src
