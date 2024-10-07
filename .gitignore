@@ -8,9 +8,7 @@
 !*.h
 !*startup*xx.s
 !*_flash.ld
-
-#/*
-#!/drivers
-#/drivers/*
-#!/drivers/include
-#!/drivers/src
+!/src
+!/drivers
+!/drivers/include
+!/drivers/src
