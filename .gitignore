@@ -7,7 +7,7 @@
 !*.c
 !*.h
 !*startup*xx.s
-!*_FLASH.ld
+!*_flash.ld
 
 #/*
 #!/drivers
