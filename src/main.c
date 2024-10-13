@@ -210,6 +210,18 @@ toggle_gpio_pin(struct gpio_reg *gpiox, const uint8_t pin)
     gpiox->odr ^= (1 << pin);
 }
 
+static uint8_t
+gpio_read_input_data_register(struct gpio_reg *gpiox,
+                                   const uint8_t pin)
+{
+    uint8_t result = 0;
+    const uint8_t mask = 0b00000001;
+
+    result = ((uint8_t)(gpiox->idr >> pin) & mask);
+
+    return result;
+}
+
 static void
 gpio_output_speed_register_control(struct gpio_reg *gpiox,
                                 const uint8_t speed_level,
