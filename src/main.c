@@ -11,10 +11,12 @@ enum {
     enable      = 1
 };
 enum {
-    gpio_mode_input     = 0,
-    gpio_mode_output    = 1,
-    gpio_mode_alt       = 2,
-    gpio_mode_analog    = 3
+    gpio_mode_input         = 0,
+    gpio_mode_output        = 1,
+    gpio_mode_alt           = 2,
+    gpio_mode_analog        = 3,
+    gpio_otyper_push_pull   = 0,
+    gpio_otyper_open_drain  = 1
 };
 
 enum {
@@ -129,8 +131,6 @@ enum {
     gpio_mode_input_fal_edge        = 4,
     gpio_mode_input_ris_edge        = 5,
     gpio_mode_input_edge_trig       = 6,
-    gpio_otyper_pp                  = 0,
-    gpio_otyper_od                  = 1,
     gpio_ospeedr_low                = 0,
     gpio_ospeedr_medium             = 1,
     gpio_ospeedr_high               = 2,
@@ -189,15 +189,27 @@ gpio_mode_register_control(struct gpio_reg *gpiox,
     uint8_t shift_position = pin * 2;
 
     gpiox->moder |= (mode << shift_position);
+}
 
+static void
+gpio_output_type_register_control(struct gpio_reg *gpiox,
+                                      const uint8_t type,
+                                       const uint8_t pin)
+{
+    if(type == gpio_otyper_push_pull) {
+        gpiox->otyper &= ~(1 << pin);
+    }
+    else {
+        gpiox->otyper |= (1 << pin);
+    }
 }
 
 static void
 wrong_delay(void)
 {
-    for(volatile uint32_t i = 0; i < 500000/5; i++);
+    const char divisor = 1;
+    for(volatile uint32_t i = 0; i < 500000 / divisor; i++);
 }
-
 
 int
 main(void)
@@ -208,8 +220,7 @@ main(void)
 
     rcc_peripheral_clock_control(gpiod_base_addr, rcc, enable);
     gpio_mode_register_control(gpiod, gpio_mode_output, pin_num);
-
-    gpiod->otyper &= ~( 1 << 12);
+    gpio_output_type_register_control(gpiod, gpio_otyper_push_pull, pin_num);
 
     for(;;) {
         gpiod->odr ^= (1 << 12);
