@@ -205,9 +205,15 @@ gpio_output_type_register_control(struct gpio_reg *gpiox,
 }
 
 static void
+toggle_gpio_pin(struct gpio_reg *gpiox, const uint8_t pin)
+{
+    gpiox->odr ^= (1 << pin);
+}
+
+static void
 wrong_delay(void)
 {
-    const char divisor = 1;
+    const char divisor = 6;
     for(volatile uint32_t i = 0; i < 500000 / divisor; i++);
 }
 
@@ -223,7 +229,7 @@ main(void)
     gpio_output_type_register_control(gpiod, gpio_otyper_push_pull, pin_num);
 
     for(;;) {
-        gpiod->odr ^= (1 << 12);
+        toggle_gpio_pin(gpiod, pin_num);
         wrong_delay();
     }
 
