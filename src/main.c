@@ -16,7 +16,11 @@ enum {
     gpio_mode_alt           = 2,
     gpio_mode_analog        = 3,
     gpio_otyper_push_pull   = 0,
-    gpio_otyper_open_drain  = 1
+    gpio_otyper_open_drain  = 1,
+    speed_low          = 0,
+    speed_medium       = 1,
+    speed_high         = 2,
+    speed_very_high    = 3,
 };
 
 enum {
@@ -50,7 +54,7 @@ enum {
 struct gpio_reg {
     volatile uint32_t moder;        /* mode register                    */
     volatile uint32_t otyper;       /* output type register             */
-    volatile uint32_t speedr;       /* output speed register            */
+    volatile uint32_t ospeedr;      /* output speed register            */
     volatile uint32_t puprd;        /* pull-up/pull-down register       */
     volatile uint32_t idr;          /* input data register              */
     volatile uint32_t odr;          /* output data register             */
@@ -131,10 +135,6 @@ enum {
     gpio_mode_input_fal_edge        = 4,
     gpio_mode_input_ris_edge        = 5,
     gpio_mode_input_edge_trig       = 6,
-    gpio_ospeedr_low                = 0,
-    gpio_ospeedr_medium             = 1,
-    gpio_ospeedr_high               = 2,
-    gpio_ospeedr_very_high          = 3,
     gpio_pupdr_no_pupd              = 0,
     gpio_pupdr_pu                   = 1,
     gpio_pupdr_pd                   = 2
@@ -211,9 +211,24 @@ toggle_gpio_pin(struct gpio_reg *gpiox, const uint8_t pin)
 }
 
 static void
+gpio_output_speed_register_control(struct gpio_reg *gpiox,
+                                const uint8_t speed_level,
+                                        const uint8_t pin)
+{
+    uint8_t shift_position = pin * 2;
+
+    if(speed_level == speed_low) {
+        gpiox->ospeedr &= ~(speed_level << shift_position);
+    }
+    else {
+        gpiox->ospeedr |= (speed_level << shift_position);
+    }
+}
+
+static void
 wrong_delay(void)
 {
-    const char divisor = 6;
+    const char divisor = 1;
     for(volatile uint32_t i = 0; i < 500000 / divisor; i++);
 }
 
@@ -222,11 +237,12 @@ main(void)
 {
     struct gpio_reg *gpiod  = (struct gpio_reg *)gpiod_base_addr;
     struct rcc_reg  *rcc    = (struct rcc_reg *)rcc_base_addr;
-    uint8_t         pin_num = 12;
+    const uint8_t   pin_num = 12;
 
     rcc_peripheral_clock_control(gpiod_base_addr, rcc, enable);
     gpio_mode_register_control(gpiod, gpio_mode_output, pin_num);
     gpio_output_type_register_control(gpiod, gpio_otyper_push_pull, pin_num);
+    gpio_output_speed_register_control(gpiod, speed_low, pin_num);
 
     for(;;) {
         toggle_gpio_pin(gpiod, pin_num);
