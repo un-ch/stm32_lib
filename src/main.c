@@ -3,42 +3,42 @@
 #include <unistd.h>
 
 enum {
-    exit_success_code   = 0,
-    exit_failure_code   = 1,
-    set         = 0,
-    reset       = 1,
-    disable     = 0,
-    enable      = 1
+	exit_success_code   = 0,
+	exit_failure_code   = 1,
+	set         = 0,
+	reset       = 1,
+	disable     = 0,
+	enable      = 1
 };
 enum {
-    gpio_mode_input         = 0,
-    gpio_mode_output        = 1,
-    gpio_mode_alt           = 2,
-    gpio_mode_analog        = 3,
-    gpio_otyper_push_pull   = 0,
-    gpio_otyper_open_drain  = 1,
-    speed_low          = 0,
-    speed_medium       = 1,
-    speed_high         = 2,
-    speed_very_high    = 3,
+	gpio_mode_input         = 0,
+	gpio_mode_output        = 1,
+	gpio_mode_alt           = 2,
+	gpio_mode_analog        = 3,
+	gpio_otyper_push_pull   = 0,
+	gpio_otyper_open_drain  = 1,
+	speed_low          = 0,
+	speed_medium       = 1,
+	speed_high         = 2,
+	speed_very_high    = 3,
 };
 
 enum {
-    flash_base_addr             = 0x08000000U,
-    sram1_base_addr             = 0x20000000U,
-    sram2_base_addr             = 0x2001C000U,
-    rom_base_addr               = 0x1FFF0000U,
-    sram                        = sram2_base_addr,
-    periph_base_addr            = 0x40000000U,
-    apb1_bus_periph_base_addr   = 0x40000000U,
-    apb2_bus_periph_base_addr   = 0x40010000U,
-    ahb1_bus_periph_base_addr   = 0x40020000U,
-    ahb2_bus_periph_base_addr   = 0x50000000U,
+	flash_base_addr             = 0x08000000U,
+	sram1_base_addr             = 0x20000000U,
+	sram2_base_addr             = 0x2001C000U,
+	rom_base_addr               = 0x1FFF0000U,
+	sram                        = sram2_base_addr,
+	periph_base_addr            = 0x40000000U,
+	apb1_bus_periph_base_addr   = 0x40000000U,
+	apb2_bus_periph_base_addr   = 0x40010000U,
+	ahb1_bus_periph_base_addr   = 0x40020000U,
+	ahb2_bus_periph_base_addr   = 0x50000000U,
 
-    gpioa_base_addr             = ahb1_bus_periph_base_addr + 0x0000,
-    gpiod_base_addr             = ahb1_bus_periph_base_addr + 0x0C00,
+	gpioa_base_addr             = ahb1_bus_periph_base_addr + 0x0000,
+	gpiod_base_addr             = ahb1_bus_periph_base_addr + 0x0C00,
 
-    rcc_base_addr               = ahb1_bus_periph_base_addr + 0x3800
+	rcc_base_addr               = ahb1_bus_periph_base_addr + 0x3800
 };
 
 #define GPIOD_BASE_ADDR             (AHB1_BUS_PERIPH_BASE_ADDR + 0x0C00)
@@ -118,26 +118,26 @@ struct rcc_reg {
 }; 
 
 struct gpio_pin_config {
-    uint8_t number;
-    uint8_t mode;
-    uint8_t speed;
-    uint8_t pu_pd_control;
-    uint8_t optup_type;
-    uint8_t pin_alt_func_mode;
+	uint8_t number;
+	uint8_t mode;
+	uint8_t speed;
+	uint8_t pu_pd_control;
+	uint8_t optup_type;
+	uint8_t pin_alt_func_mode;
 };
 
 struct gpio_handle {
-    struct reg                  *gpiox;          /* for the base adress */
-    struct gpio_pin_config      pin_config;   
+	struct reg                  *gpiox;          /* for the base adress */
+	struct gpio_pin_config      pin_config;   
 };
 
 enum {
-    gpio_mode_input_fal_edge        = 4,
-    gpio_mode_input_ris_edge        = 5,
-    gpio_mode_input_edge_trig       = 6,
-    gpio_pupdr_no_pupd              = 0,
-    gpio_pupdr_pu                   = 1,
-    gpio_pupdr_pd                   = 2
+	gpio_mode_input_fal_edge        = 4,
+	gpio_mode_input_ris_edge        = 5,
+	gpio_mode_input_edge_trig       = 6,
+	gpio_pupdr_no_pupd              = 0,
+	gpio_pupdr_pu                   = 1,
+	gpio_pupdr_pd                   = 2
 };
 
 /*
@@ -169,16 +169,18 @@ rcc_peripheral_clock_control(const uint32_t gpiox_base_addr,
                                         struct rcc_reg *rcc,
                                         const uint8_t state)
 {
-    uint8_t shift_position  = 0;
+	uint8_t shift_position  = 0;
 
-    switch(gpiox_base_addr) {
-        case gpioa_base_addr:
-            break;
-        case gpiod_base_addr:
-            shift_position = 3; 
-            rcc->ahb1enr |= (state << shift_position);
-            break;
-    }
+	switch(gpiox_base_addr) {
+	case gpioa_base_addr:
+		shift_position = 0;
+		rcc->ahb1enr |= (state << shift_position);
+		break;
+	case gpiod_base_addr:
+		shift_position = 3; 
+		rcc->ahb1enr |= (state << shift_position);
+		break;
+	}
 }
 
 static void
@@ -200,7 +202,7 @@ gpio_output_type_register_control(struct gpio_reg *gpiox,
         gpiox->otyper &= ~(1 << pin);
     }
     else {
-        gpiox->otyper |= (1 << pin);
+        gpiox->otyper |= (type << pin);
     }
 }
 
@@ -245,21 +247,41 @@ wrong_delay(void)
 }
 
 int
-main(void)
+main()
 {
-    struct gpio_reg *gpiod  = (struct gpio_reg *)gpiod_base_addr;
-    struct rcc_reg  *rcc    = (struct rcc_reg *)rcc_base_addr;
-    const uint8_t   pin_num = 12;
+	struct gpio_reg *gpioa  = (struct gpio_reg *)gpioa_base_addr;
+	struct gpio_reg *gpiod  = (struct gpio_reg *)gpiod_base_addr;
 
-    rcc_peripheral_clock_control(gpiod_base_addr, rcc, enable);
-    gpio_mode_register_control(gpiod, gpio_mode_output, pin_num);
-    gpio_output_type_register_control(gpiod, gpio_otyper_push_pull, pin_num);
-    gpio_output_speed_register_control(gpiod, speed_low, pin_num);
+	struct rcc_reg  *rcc    = (struct rcc_reg *)rcc_base_addr;
 
-    for(;;) {
-        toggle_gpio_pin(gpiod, pin_num);
-        wrong_delay();
-    }
+	const uint8_t   pin_num = 12;
+	const uint8_t   user_button_pin_num = 0;
+	uint8_t         user_button_state = 0;
 
-    return exit_success_code;
+	rcc_peripheral_clock_control(gpiod_base_addr, rcc, enable);
+	rcc_peripheral_clock_control(gpioa_base_addr, rcc, enable);
+
+	gpio_mode_register_control(gpiod, gpio_mode_output, pin_num);
+	gpio_mode_register_control(gpioa, gpio_mode_input, user_button_pin_num);
+
+	gpio_output_type_register_control(gpiod, gpio_otyper_push_pull, pin_num);
+	gpio_output_speed_register_control(gpiod, speed_low, pin_num);
+
+	for(;;) {
+
+		toggle_gpio_pin(gpiod, pin_num);
+		wrong_delay();
+		/*
+		user_button_state = gpio_read_input_data_register(gpioa, user_button_pin_num);
+
+		if(user_button_state == 1) {
+			gpiod->odr |= (1 << pin_num);
+		}
+		else {
+			gpiod->odr &= ~(1 << pin_num);
+		}
+		*/
+	}
+
+	return exit_success_code;
 }

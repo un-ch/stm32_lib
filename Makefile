@@ -10,8 +10,9 @@ BUILD_DIR = build
 C_SOURCES =  \
     src/main.c \
     src/sysmem.c \
-    src/syscalls.c \
-    drivers/src/stm32f407xx_gpio_driver.c
+    src/syscalls.c
+
+#drivers/src/stm32f407xx_gpio_driver.c
 
 # ASM sources
 ASM_SOURCES = startup_stm32f407xx.s
@@ -123,6 +124,12 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	
 $(BUILD_DIR):
 	mkdir $@		
+
+#######################################
+# flash with OpenOcd tool
+#######################################
+run: all
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
 
 clean:
 	rm -rf $(BUILD_DIR)

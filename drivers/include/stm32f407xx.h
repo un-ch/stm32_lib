@@ -7,11 +7,29 @@ enum {
     exit_success_code   = 0,
     exit_failure_code   = 1,
 
-    disable     = 0,
-    enable      = 1,
 
     set         = 0,
     reset       = 1
+};
+
+enum state {
+    disable     = 0,
+    enable      = 1
+};
+
+enum {
+    flash_base_addr             = 0x08000000U,
+    sram1_base_addr             = 0x20000000U,
+    sram2_base_addr             = 0x2001C000U,
+    rom_base_addr               = 0x1FFF0000U,
+    sram                        = sram2_base_addr,
+    periph_base_addr            = 0x40000000U,
+    apb1_bus_periph_base_addr   = 0x40000000U,
+    apb2_bus_periph_base_addr   = 0x40010000U,
+    ahb1_bus_periph_base_addr   = 0x40020000U,
+    ahb2_bus_periph_base_addr   = 0x50000000U,
+
+    gpioa_base_add              = ahb1_bus_periph_base_addr + 0x0000
 };
 
 #define FLASH_BASE_ADDR             0x08000000U
@@ -70,25 +88,39 @@ enum {
 #define SPI_I2SCFGR                 (SPI1_BASE_ADDR + 0x001C)
 #define SPI_I2SPR                   (SPI1_BASE_ADDR + 0x0020)
 
-#define GPIOA                       ((GPIO_Reg_t *)GPIOA_BASE_ADDR)
-#define GPIOB                       ((GPIO_Reg_t *)GPIOB_BASE_ADDR)
-#define GPIOC                       ((GPIO_Reg_t *)GPIOC_BASE_ADDR)
-#define GPIOD                       ((GPIO_Reg_t *)GPIOD_BASE_ADDR)
-#define GPIOE                       ((GPIO_Reg_t *)GPIOE_BASE_ADDR)
-#define GPIOF                       ((GPIO_Reg_t *)GPIOF_BASE_ADDR)
-#define GPIOG                       ((GPIO_Reg_t *)GPIOG_BASE_ADDR)
-#define GPIOH                       ((GPIO_Reg_t *)GPIOH_BASE_ADDR)
-#define GPIOI                       ((GPIO_Reg_t *)GPIOI_BASE_ADDR)
-#define GPIOJ                       ((GPIO_Reg_t *)GPIOJ_BASE_ADDR)
-#define GPIOK                       ((GPIO_Reg_t *)GPIOK_BASE_ADDR)
+#define GPIOA                       ((struct gpio_reg *)GPIOA_BASE_ADDR)
+#define GPIOB                       ((struct gpio_reg *)GPIOB_BASE_ADDR)
+#define GPIOC                       ((struct gpio_reg *)GPIOC_BASE_ADDR)
+#define GPIOD                       ((struct gpio_reg *)GPIOD_BASE_ADDR)
+#define GPIOE                       ((struct gpio_reg *)GPIOE_BASE_ADDR)
+#define GPIOF                       ((struct gpio_reg *)GPIOF_BASE_ADDR)
+#define GPIOG                       ((struct gpio_reg *)GPIOG_BASE_ADDR)
+#define GPIOH                       ((struct gpio_reg *)GPIOH_BASE_ADDR)
+#define GPIOI                       ((struct gpio_reg *)GPIOI_BASE_ADDR)
+#define GPIOJ                       ((struct gpio_reg *)GPIOJ_BASE_ADDR)
+#define GPIOK                       ((struct gpio_reg *)GPIOK_BASE_ADDR)
 
-#define RCC                         ((RCC_Reg_t *)RCC_BASE_ADDR)
+#define RCC                         ((struct rcc_reg *)RCC_BASE_ADDR)
 
 #define GPIOA_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 0 ))
 #define GPIOB_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 1 ))
+#define GPIOC_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 2 ))
+#define GPIOD_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 3 ))
+#define GPIOE_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 4 ))
+#define GPIOF_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 5 ))
+#define GPIOG_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 6 ))
+#define GPIOH_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 7 ))
+#define GPIOI_PCLK_ENABLE           ( RCC->ahb1enr |= ( 1 << 8 ))
 
 #define GPIOA_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 0 ))
 #define GPIOB_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 1 ))
+#define GPIOC_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 2 ))
+#define GPIOD_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 3 ))
+#define GPIOE_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 4 ))
+#define GPIOF_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 5 ))
+#define GPIOG_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 6 ))
+#define GPIOH_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 7 ))
+#define GPIOI_PCLK_DISABLE          ( RCC->ahb1enr &= ~( 1 << 8 ))
 
 #define SPI1_PCLK_ENABLE            ( RCC->apb2enr |= ( 1 << 12 ))
 #define SPI2_PCLK_ENABLE            ( RCC->apb1enr |= ( 1 << 14 ))
@@ -119,7 +151,7 @@ enum {
 #define SYSCFG_PCLK_ENABLE          ( RCC->apb2enr |= ( 1 << 14 ))
 #define SYSCFG_PCLK_DISABLE         ( RCC->apb2enr &= ~( 1 << 14 ))
 
-struct gpio_reg_t {
+struct gpio_reg {
     volatile uint32_t moder;        /* mode register                    */
     volatile uint32_t otyper;       /* output type register             */
     volatile uint32_t speedr;       /* output speed register            */
@@ -132,7 +164,24 @@ struct gpio_reg_t {
     volatile uint32_t afrh;         /* alternate function high register */
 };
 
-struct rcc_reg_t {
+struct gpio_port {
+    uint8_t id;
+    uint8_t base_addr;
+
+    volatile uint32_t moder;        /* mode register                    */
+    volatile uint32_t otyper;       /* output type register             */
+    volatile uint32_t speedr;       /* output speed register            */
+    volatile uint32_t puprd;        /* pull-up/pull-down register       */
+    volatile uint32_t idr;          /* input data register              */
+    volatile uint32_t odr;          /* output data register             */
+    volatile uint32_t bsrr;         /* bit set/reset register           */
+    volatile uint32_t lckr;         /* configuration lock register      */
+    volatile uint32_t afrl;         /* alternate function low register  */
+    volatile uint32_t afrh;         /* alternate function high register */
+};
+
+
+struct rcc_reg {
     volatile uint32_t cr;          /* RCC clock control register            */
     volatile uint32_t pllcfgr;     /* PLL configuration register            */
     volatile uint32_t cfgr;        /* RCC clock configuration register      */
@@ -168,5 +217,6 @@ struct rcc_reg_t {
     volatile uint32_t sscgr;
     volatile uint32_t plli2scfgr;
 }; 
+
 
 #endif
